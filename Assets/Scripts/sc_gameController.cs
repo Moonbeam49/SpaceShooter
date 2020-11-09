@@ -5,6 +5,7 @@ using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
+//Основной контроллер приложения, обрабатывает нажатия кнопок UI, отвечает за работу с сохранениями, игровыми меню и текущим состоянием кампании
 public class sc_gameController : MonoBehaviour
 {
     public sc_UI ui;
@@ -16,21 +17,23 @@ public class sc_gameController : MonoBehaviour
     public int curLvlOpen;
     string savePath;
 
+    //Проверяет наличие папки для сохранений, создает директорию, если ее нет
     void Start()
     {
         savePath = Application.dataPath + "/saves";
         if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
-        checkSaves();
     }
 
+    //Метод возвращает количество сейвов в папке, используется при генерации новой кампании
     public void checkSaves()
     {
-        string[] files = Directory.GetFiles(savePath);
         savescount = Directory.GetFiles(savePath).Length;
     }
 
+    //Вызывается при нажатии кнопки "New Game", проверяет, не превышено ли максимальное количество сохранений, если нет - генерирует новую кампанию, сохраняет ее и передает на UI для отрисовки
     public void newGame()
     {
+        checkSaves();
         if (savescount < 3)
         {
             curCampaign = new cl_campaign();
@@ -44,12 +47,14 @@ public class sc_gameController : MonoBehaviour
         }
     }
 
+    //Вызывается при нажатии на кнопку "Load Game", собирает названия сохранений в папке и передает их на UI для отрисовки
     public void InitLoadMenu()
     {
         string[] files = Directory.GetFiles(savePath);
         ui.showSaveSelector(files);
     }
 
+    //Вызывается при нажатии на кнопку удаления сохранения, удаляет сейв, после чего запускает обновление информации на экране
     public void removeSave(int index)
     {
         File.Delete(savePath + "/save" + index + ".xml");
@@ -58,6 +63,7 @@ public class sc_gameController : MonoBehaviour
         if(savescount!=0)savescount--;
     }
 
+    //Вызывается после удаления одного из сейвов, восстанавливает порядок в именах сейвов (save1, save2...)
     public void renameSaves()
     {
         string[] files = Directory.GetFiles(savePath);
@@ -67,6 +73,7 @@ public class sc_gameController : MonoBehaviour
         }
     }
 
+    //Вызывается при нажатии на кнопку загрузки определенного сохранения, открывает файл, генерирует кампанию из полученного сида и передает ее на UI для отрисовки
     public void loadSave(int index)
     {
         Stream stream = File.Open(savePath + "/save" + index + ".xml", FileMode.Open);
@@ -79,6 +86,7 @@ public class sc_gameController : MonoBehaviour
         ui.openCampaign(curCampaign);
     }
 
+    //Вызывается при создании, либо обновлении статуса кампании, сохраняет ее в указанный файл
     public void saveGame(cl_campaign camp,bool newSave, int index)
     {
         if (newSave)
@@ -92,6 +100,7 @@ public class sc_gameController : MonoBehaviour
         stream.Close();
     }
 
+    //Вызывается при выборе уровня в окне кампании, переключает UI на игровое поле, запускает контроллер игрового поля
     public void openLevel(int index)
     {
         curLvlOpen = index;
@@ -105,6 +114,7 @@ public class sc_gameController : MonoBehaviour
         playField.playLevel(curCampaign.levels[index]);
     }
 
+    //Вызывается при уничтожении врага на игровом поле, проверяет, уничтожены ли все враги на уровне, если да - обновляет статус кампании и сохраняет ее
     public void newProgress(int prg)
     {
         ui.updateProgress(prg);
@@ -123,12 +133,12 @@ public class sc_gameController : MonoBehaviour
         }
     }
 
+    //Вызывается при получении урона игроком, если была потрачена последняя жизнь, возвращает на экран кампании
     public void newHealth(int lives)
     {
         ui.displayLives(lives);
         if (lives == 0)
         {
-            Debug.LogWarning("GameOver!");
             ui.openCampaign(curCampaign);
         }
     }

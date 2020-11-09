@@ -1,21 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
+
+// Модель кампании, хранящая и предоставляющая методы для генерации кампаний (список уровеней) и уровней (список врагов)
 [System.Serializable()]
 public class cl_campaign 
 {
     public int length = 10;
     public float avgLvlTime = 15f;
     
-    public int seed;
-    public int[] states;
+    //Значения, необходимые для работы сохранений
+    public int seed; //Используется для получения воспроизводимых результатов при генерации случайных чисел
+    public int[] states; //Массив, хранящий в себе состояние уровней в кампании, где: 0 - уровень недоступен, 1 - уровень открыт, 2 - уровень пройден
 
     [System.NonSerialized()] public List<cl_level> levels;
     [System.NonSerialized()] public System.Random randObj;
 
+    //Генерирует список уровней, принимает сид из загруженного сохранения
     public void generate(bool fromSeed, int Seed)
     {
         if (fromSeed)
@@ -24,7 +25,7 @@ public class cl_campaign
             randObj = new System.Random(Seed);
         } else
         {
-            seed = UnityEngine.Random.Range(0, 123456);
+            seed = Random.Range(0, 123456);
             states = new int[length];
             randObj = new System.Random(seed);
         }
@@ -49,6 +50,8 @@ public class cl_campaign
         }
     }
 
+
+    //Список врагов со следующими характеристиками - время спауна (количество секунд от запуска уровня), тип (0-2 - астероиды, 3 - корабль) и скорость движения
     public class cl_level
     {
         public List<Enemy> level;
@@ -59,7 +62,7 @@ public class cl_campaign
             public int type;
             public float speed;
         }
-
+        //Генерирует список врагов для кампании, чем выше сложность, тем больше кораблей и выше максимальная скорость объектов
         public void generate(float maxTime, int totalEnemies, float difficulty, System.Random randObj)
         {
             if (level == null)

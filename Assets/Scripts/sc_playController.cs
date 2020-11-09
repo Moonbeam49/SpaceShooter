@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//Вспомогательный контроллер игрового поля, обрабатывает ввод с клавиатуры, управляет объектами на игровом поле
 public class sc_playController : MonoBehaviour
 {
     public sc_gameController gameC;
@@ -15,6 +17,8 @@ public class sc_playController : MonoBehaviour
 
     List<cl_campaign.cl_level.Enemy> curLVL;
     float xMax, yMax;
+
+    //Проверяет размеры камеры и переставляет границы уровня
     void Start()
     {
         yMax = Camera.main.orthographicSize;
@@ -26,6 +30,7 @@ public class sc_playController : MonoBehaviour
         BordB.transform.position = new Vector3(0, -yMax+0.15f);
     }
     
+    //Запускает воспроизведение уровня на игровом поле
     public void playLevel(cl_campaign.cl_level level)
     {
         curLVL = level.level;
@@ -33,6 +38,7 @@ public class sc_playController : MonoBehaviour
         StartCoroutine(spawnMeteor(curLVL[0].spawntime, curLVL[0].type, curLVL[0].speed, 0));
     }
 
+    //Используется для спауна врагов с учетом задержки, проходит по всему списку врагов
     IEnumerator spawnMeteor(float delay, int type, float spd, int count)
     {
         yield return new WaitForSecondsRealtime(delay);
@@ -45,12 +51,14 @@ public class sc_playController : MonoBehaviour
 
     }
 
+    //Вызывается при получении урона игроком
     public void playerGotHit()
     {
         lives--;
         gameC.newHealth(lives);
     }
 
+    //Вызывается при уничтожении врага, считает текущий прогресс на уровне и передает его на контроллер
     public void enemyDied()
     {
         enemiesLeft--;
@@ -58,6 +66,7 @@ public class sc_playController : MonoBehaviour
         if(lives != 0)gameC.newProgress(prg);
     }
 
+    //Используется для очищения игрового поля перед переключением экрана на меню
     public void cleanField()
     {
         StopAllCoroutines();
@@ -69,7 +78,7 @@ public class sc_playController : MonoBehaviour
         player.rb.velocity = new Vector3(0, 0);
     }
 
-    // Update is called once per frame
+    //Регистрирует ввод с клавиатуры и передает его на объект игрока
     void Update()
     {
         Vector3 moveDir = Vector3.zero;

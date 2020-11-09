@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Модель, используемая для работы со всеми снарядами на игровом поле, обрабатывает евенты столкновений
 public class sc_projectile : MonoBehaviour
 {
     public Rigidbody rb;
@@ -9,7 +10,8 @@ public class sc_projectile : MonoBehaviour
     public bool enemy, ship;
     public GameObject projectile;
     public sc_playController FieldController;
-    // Start is called before the first frame update
+
+    //Привязывает префаб к существующему контроллеру, запускает движение объекта, в случае, если объект - корабль, запускает стрельбу
     void Start()
     {
         FieldController = GameObject.Find("Field").GetComponent<sc_playController>();
@@ -25,6 +27,7 @@ public class sc_projectile : MonoBehaviour
         }
     }
 
+    //Ислпользуется для стрельбы вражеских кораблей через равные промежутки времени
     IEnumerator shoot()
     {
         yield return new WaitForSecondsRealtime(1f);
@@ -32,6 +35,7 @@ public class sc_projectile : MonoBehaviour
         StartCoroutine(shoot());
     }
 
+    //Евент, используемый для уничтожения объектов, покинувших пределы карты
     private void OnTriggerExit(Collider other)
     {
         switch (other.tag)
@@ -51,6 +55,8 @@ public class sc_projectile : MonoBehaviour
                 break;
         }
     }
+
+    //Евент, используемый для обработки столкновений объектов на игровом поле
     private void OnTriggerEnter(Collider other)
     {
         switch (other.tag)
